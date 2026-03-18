@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rosario, Tierra del 10 · Stern Motors</title>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--surface:#111;--border:#1f1f1f;--bh:#333;--text:#f0f0f0;--muted:#555;--dim:#2a2a2a;--white:#fff}
+body{background:var(--bg);color:var(--text);font-family:'Work Sans',sans-serif;font-weight:300;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px}
+.logo{position:fixed;top:28px;left:32px;font-size:10px;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
+.wrap{width:100%;max-width:440px}
+.header{text-align:center;margin-bottom:36px}
+.eyebrow{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+h1{font-size:26px;font-weight:200;letter-spacing:-.3px}
+h1 strong{font-weight:500;color:var(--white)}
+.panel{border:1px solid var(--border);background:var(--surface);position:relative;overflow:hidden;aspect-ratio:4/3;display:flex;align-items:center;justify-content:center}
+.plabel{display:flex;justify-content:space-between;padding:8px 14px;border:1px solid var(--border);border-top:none}
+.plabel span{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
+.upload{cursor:pointer;flex-direction:column;gap:10px;transition:border-color .2s}
+.upload:hover,.upload.drag{border-color:var(--bh)}
+.upload input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload svg{width:20px;height:20px;stroke:var(--muted);fill:none;stroke-width:1.5;opacity:.4}
+.up-t{font-size:13px;color:var(--muted)}
+.up-h{font-size:10px;color:var(--dim);letter-spacing:1px}
+.prev{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+.upload.has .prev{display:block}
+.upload.has svg,.upload.has .up-t,.upload.has .up-h{opacity:0;pointer-events:none}
+.idle-n{font-size:72px;font-weight:200;color:var(--border);line-height:1;margin-bottom:6px}
+.idle-t{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
+.loading{display:none;flex-direction:column;align-items:center;gap:14px}
+.loading.show{display:flex}
+.spin{width:20px;height:20px;border:1px solid var(--border);border-top-color:var(--muted);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ltxt{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.res-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+.res-img.show{display:block;animation:fi .8s ease}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.btn{width:100%;margin-top:2px;padding:17px;background:var(--white);color:var(--bg);border:none;font-family:'Work Sans',sans-serif;font-size:11px;font-weight:500;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn:disabled{opacity:.2;cursor:not-allowed}
+.acts{display:none;gap:2px;margin-top:2px}
+.acts.show{display:flex}
+.abtn{flex:1;padding:13px;background:var(--surface);border:1px solid var(--border);font-family:'Work Sans',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all .15s}
+.abtn:hover{border-color:var(--bh);color:var(--text)}
+.abtn.p{background:var(--white);color:var(--bg);border-color:var(--white)}
+.abtn.p:hover{opacity:.85}
+.status{margin-top:12px;text-align:center;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);min-height:16px}
+.status.error{color:#c0392b}
+.share{display:none;margin-top:24px;padding:22px;border:1px solid var(--border);text-align:center}
+.share.show{display:block}
+.stags{font-size:11px;color:var(--muted);line-height:2.4;margin-bottom:14px}
+.sbtns{display:flex;gap:2px}
+.sbtn{flex:1;padding:11px;background:transparent;border:1px solid var(--border);font-family:'Work Sans',sans-serif;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);cursor:pointer;transition:all .15s}
+.sbtn:hover{border-color:var(--bh);color:var(--text)}
+.footer{margin-top:36px;text-align:center;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="logo">Stern Motors</div>
+<div class="wrap">
+  <div class="header">
+    <p class="eyebrow">Rosario · Tierra del 10</p>
+    <h1>Tu retrato <strong>extraordinario</strong></h1>
+  </div>
+
+  <div class="panel upload" id="up">
+    <input type="file" id="fi" accept="image/*"/>
+    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+    <p class="up-t">Subí tu foto</p>
+    <p class="up-h">JPG · PNG · hasta 10mb</p>
+    <img class="prev" id="prev" src="" alt=""/>
+  </div>
+  <div class="plabel"><span>Tu foto</span><span id="fn">—</span></div>
+
+  <div class="panel" style="border-top:none">
+    <div id="idle"><div class="idle-n">10</div><p class="idle-t">Resultado</p></div>
+    <div class="loading" id="load"><div class="spin"></div><p class="ltxt" id="ltxt">Generando</p></div>
+    <img class="res-img" id="res" alt="Retrato IA"/>
+  </div>
+  <div class="plabel"><span>Retrato · IA</span><span>Stern Motors</span></div>
+
+  <button class="btn" id="gen" disabled>Subí tu foto primero</button>
+  <div class="acts" id="acts">
+    <button class="abtn p" id="dl">Descargar</button>
+    <button class="abtn" id="regen">Regenerar</button>
+    <button class="abtn" id="nw">Nueva foto</button>
+  </div>
+  <p class="status" id="st"></p>
+
+  <div class="share" id="shr">
+    <p class="stags">#RosarioTierraDel10<br>#SternMotors · #10CopasPlatino</p>
+    <div class="sbtns">
+      <button class="sbtn" id="wa">WhatsApp</button>
+      <button class="sbtn" id="ig">Instagram</button>
+      <button class="sbtn" id="cp">Copiar hashtags</button>
+    </div>
+  </div>
+  <p class="footer">10 Copas Platino · Mercedes-Benz Argentina</p>
+</div>
+
+<script>
+let resDataUrl = null;
+
+const up   = document.getElementById('up');
+const fi   = document.getElementById('fi');
+const prev = document.getElementById('prev');
+const fn   = document.getElementById('fn');
+const idle = document.getElementById('idle');
+const load = document.getElementById('load');
+const ltxt = document.getElementById('ltxt');
+const res  = document.getElementById('res');
+const gen  = document.getElementById('gen');
+const acts = document.getElementById('acts');
+const st   = document.getElementById('st');
+const shr  = document.getElementById('shr');
+
+fi.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+up.addEventListener('dragover', e => { e.preventDefault(); up.classList.add('drag'); });
+up.addEventListener('dragleave', () => up.classList.remove('drag'));
+up.addEventListener('drop', e => {
+  e.preventDefault(); up.classList.remove('drag');
+  if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+});
+
+function loadFile(file) {
+  if (!file.type.startsWith('image/')) return msg('Solo imágenes JPG o PNG', 'error');
+  if (file.size > 10 * 1024 * 1024) return msg('Máximo 10MB', 'error');
+  const reader = new FileReader();
+  reader.onload = e => {
+    prev.src = e.target.result;
+    up.classList.add('has');
+    fn.textContent = file.name.length > 22 ? file.name.slice(0,20)+'…' : file.name;
+    gen.disabled = false;
+    gen.textContent = 'Generar retrato';
+    resetResult(); resDataUrl = null; msg('');
+  };
+  reader.readAsDataURL(file);
+}
+
+gen.addEventListener('click', () => generate());
+document.getElementById('regen').addEventListener('click', () => generate());
+
+async function generate() {
+  gen.disabled = true;
+  gen.textContent = 'Generando...';
+  idle.style.display = 'none';
+  res.classList.remove('show');
+  load.classList.add('show');
+  acts.classList.remove('show');
+  shr.classList.remove('show');
+  resDataUrl = null; msg('');
+
+  const steps = ['Generando','Aplicando estética Mercedes','Procesando','Finalizando'];
+  let si = 0; ltxt.textContent = steps[0];
+  const t = setInterval(() => { si = (si+1) % steps.length; ltxt.textContent = steps[si]; }, 7000);
+
+  try {
+    const r = await fetch('/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}'
+    });
+
+    clearInterval(t);
+
+    // Modelo cargando → reintentar automáticamente
+    if (r.status === 503) {
+      const data = await r.json().catch(() => ({ wait: 30 }));
+      const wait = data.wait || 30;
+      msg(`Modelo iniciando, reintentando en ${wait}s...`);
+      await new Promise(x => setTimeout(x, wait * 1000));
+      resetResult();
+      generate();
+      return;
+    }
+
+    if (!r.ok) {
+      const data = await r.json().catch(() => ({}));
+      throw new Error(data.error || `Error ${r.status}`);
+    }
+
+    const blob = await r.blob();
+    resDataUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+
+    res.src = resDataUrl;
+    load.classList.remove('show');
+    res.classList.add('show');
+    acts.classList.add('show');
+    shr.classList.add('show');
+    gen.disabled = false;
+    gen.textContent = 'Regenerar';
+    msg('Listo');
+
+  } catch(err) {
+    clearInterval(t);
+    resetResult();
+    gen.disabled = false;
+    gen.textContent = 'Reintentar';
+    msg(err.message || 'Error. Intentá de nuevo.', 'error');
+  }
+}
+
+document.getElementById('dl').addEventListener('click', () => {
+  if (!resDataUrl) return;
+  const a = document.createElement('a');
+  a.href = resDataUrl; a.download = 'retrato-stern-motors.jpg';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+});
+
+document.getElementById('nw').addEventListener('click', () => {
+  up.classList.remove('has'); prev.src=''; fi.value=''; fn.textContent='—';
+  gen.disabled=true; gen.textContent='Subí tu foto primero';
+  acts.classList.remove('show'); shr.classList.remove('show');
+  resetResult(); resDataUrl=null; msg('');
+});
+
+document.getElementById('wa').addEventListener('click', () =>
+  window.open('https://wa.me/?text='+encodeURIComponent('¡Mirá mi retrato extraordinario! 🏆 #RosarioTierraDel10 #SternMotors #10CopasPlatino'),'_blank'));
+document.getElementById('ig').addEventListener('click', () => {
+  if (resDataUrl) { const a = document.createElement('a'); a.href=resDataUrl; a.download='retrato-stern.jpg'; document.body.appendChild(a); a.click(); document.body.removeChild(a); }
+  msg('Guardá y subila con #RosarioTierraDel10');
+});
+document.getElementById('cp').addEventListener('click', () =>
+  navigator.clipboard.writeText('#RosarioTierraDel10 #SternMotors #10CopasPlatino').then(()=>msg('Copiado')));
+
+function resetResult() { res.src=''; res.classList.remove('show'); idle.style.display='block'; load.classList.remove('show'); }
+function msg(m, type='') { st.textContent=m; st.className='status'+(type?' '+type:''); }
+</script>
+</body>
+</html>
