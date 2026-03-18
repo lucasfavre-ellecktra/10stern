@@ -102,6 +102,7 @@ h1 strong{font-weight:500;color:var(--white)}
 
 <script>
 let resDataUrl = null;
+let imageBase64 = null;
 
 const up   = document.getElementById('up');
 const fi   = document.getElementById('fi');
@@ -129,7 +130,10 @@ function loadFile(file) {
   if (file.size > 10 * 1024 * 1024) return msg('Máximo 10MB', 'error');
   const reader = new FileReader();
   reader.onload = e => {
-    prev.src = e.target.result;
+    const dataUrl = e.target.result;
+    // Guardamos solo el base64 puro (sin el prefijo data:...)
+    imageBase64 = dataUrl.split(',')[1];
+    prev.src = dataUrl;
     up.classList.add('has');
     fn.textContent = file.name.length > 22 ? file.name.slice(0,20)+'…' : file.name;
     gen.disabled = false;
@@ -143,6 +147,7 @@ gen.addEventListener('click', () => generate());
 document.getElementById('regen').addEventListener('click', () => generate());
 
 async function generate() {
+  if (!imageBase64) return;
   gen.disabled = true;
   gen.textContent = 'Generando...';
   idle.style.display = 'none';
@@ -152,20 +157,19 @@ async function generate() {
   shr.classList.remove('show');
   resDataUrl = null; msg('');
 
-  const steps = ['Generando','Aplicando estética Mercedes','Procesando','Finalizando'];
+  const steps = ['Procesando tu foto','Aplicando estética Mercedes','Generando retrato','Finalizando'];
   let si = 0; ltxt.textContent = steps[0];
   const t = setInterval(() => { si = (si+1) % steps.length; ltxt.textContent = steps[si]; }, 7000);
 
   try {
-    const r = await fetch('/generate', {
+    const r = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: '{}'
+      body: JSON.stringify({ image: imageBase64 })
     });
 
     clearInterval(t);
 
-    // Modelo cargando → reintentar automáticamente
     if (r.status === 503) {
       const data = await r.json().catch(() => ({ wait: 30 }));
       const wait = data.wait || 30;
@@ -216,6 +220,7 @@ document.getElementById('dl').addEventListener('click', () => {
 
 document.getElementById('nw').addEventListener('click', () => {
   up.classList.remove('has'); prev.src=''; fi.value=''; fn.textContent='—';
+  imageBase64 = null;
   gen.disabled=true; gen.textContent='Subí tu foto primero';
   acts.classList.remove('show'); shr.classList.remove('show');
   resetResult(); resDataUrl=null; msg('');
